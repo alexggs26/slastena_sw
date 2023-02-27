@@ -82,6 +82,15 @@ const store = {
                         reject(err)
                     })
             })
+        },
+        logout({ commit }) {
+            return new Promise((resolve) => {
+                commit('logout')
+                localStorage.removeItem('token')
+                localStorage.removeItem('user')
+                delete axios.defaults.headers.common['Authorization']
+                resolve()
+            })
         }
     },
     modules: {}

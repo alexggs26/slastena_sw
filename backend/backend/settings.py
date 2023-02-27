@@ -99,10 +99,10 @@ DATABASES = {
     'default': {
         'ENGINE': app_settings.DB_ENGINE,
         'NAME': app_settings.DB_NAME,
-        'USER': app_settings.DB_USER,
-        'PASSWORD': app_settings.DB_PASSWORD,
-        'HOST': app_settings.DB_HOST,
-        'PORT': app_settings.DB_PORT,
+        # 'USER': app_settings.DB_USER,
+        # 'PASSWORD': app_settings.DB_PASSWORD,
+        # 'HOST': app_settings.DB_HOST,
+        # 'PORT': app_settings.DB_PORT,
     }
 }
 
