@@ -78,7 +78,7 @@ export default {
             let password = this.password
             this.$store
             .dispatch('login', { email, password })
-            .then(() => this.$router.push('/main'))
+            .then(() => this.$router.push('/orders'))
             .catch(err => console.log(err))
         },
         toRegister () {

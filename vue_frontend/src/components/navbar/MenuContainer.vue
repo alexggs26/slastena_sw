@@ -4,25 +4,13 @@
             <v-list nav dense>
                 <v-list-item-group color="accent">
                     <v-list-item>
-                        <router-link to="/main">Главная</router-link>
+                        <router-link to="/app/orders">Заказы</router-link>
                     </v-list-item>
                     <v-list-item>
-                        <router-link to="/business-process">Поставщики</router-link>
+                        <router-link to="/app/providers">Поставщики</router-link>
                     </v-list-item>
                     <v-list-item>
-                        <router-link to="/sales">Управление заказами</router-link>
-                    </v-list-item>
-                    <v-list-item>
-                        <router-link to="/service">Продажи</router-link>
-                    </v-list-item>
-                    <v-list-item>
-                        <router-link to="/integration">Склад</router-link>
-                    </v-list-item>
-                    <v-list-item>
-                        <router-link to="/warehouse">Отчеты</router-link>
-                    </v-list-item>
-                    <v-list-item>
-                        <router-link to="/finance">Помощь</router-link>
+                        <router-link to="/app/nomenclature">Товары</router-link>
                     </v-list-item>
                 </v-list-item-group>
             </v-list>

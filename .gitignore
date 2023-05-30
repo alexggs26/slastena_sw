@@ -1,2 +1,4 @@
 app_settings.py
 node_modules/
+__pycache__
+env/

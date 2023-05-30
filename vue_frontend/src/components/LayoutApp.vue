@@ -19,7 +19,7 @@
     </v-navigation-drawer>
     <v-main>
         <v-container fluid>
-            <router-view></router-view>
+            <router-view>></router-view>
         </v-container>
     </v-main>
 </v-app>
@@ -31,7 +31,7 @@ import MenuContainer from './navbar/MenuContainer.vue'
 export default {
     name: 'LayoutApp',
     components: {
-        MenuContainer
+        MenuContainer,
     },
     methods: {
       logout () {

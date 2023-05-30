@@ -16,7 +16,7 @@ from datetime import timedelta
 from django.utils import encoding
 from django.utils.encoding import smart_str
 
-import app_settings
+from main_app import app_settings
 
 
 encoding.smart_text = smart_str

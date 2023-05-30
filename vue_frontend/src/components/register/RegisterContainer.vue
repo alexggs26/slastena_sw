@@ -90,8 +90,8 @@ export default {
             show1: false,
             rules: {
                 required: value => !!value || 'Введите пароль',
-                min: v => v.length >= 6 || 'Минимум 6 символолов',
-                emailMatch: () => (`The email and password you entered don't match`),
+                min: v => v.length >= 2 || 'Минимум 2 символа',
+                emailMatch: () => (`Адреса электронной почты не совпадают`),
                 // mismatchPasswords: value => value != this.password || 'Пароли не совпадают',
         },
 
