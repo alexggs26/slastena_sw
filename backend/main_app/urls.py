@@ -11,5 +11,6 @@ urlpatterns = [
     path('providers/<int:pk>', ProviderView.as_view()),
     path('providers/contacts/provider_<int:pk>/', ContactsView.as_view()),
     path('providers/requisits/provider_<int:pk>', RequisitsView.as_view()),
+    path('get_all_users/', UserRegistrationView.as_view())
 ]
 

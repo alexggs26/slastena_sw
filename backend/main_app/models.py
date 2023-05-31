@@ -4,7 +4,6 @@ from django.utils import timezone
 from django.contrib.auth.models import (
     AbstractBaseUser, PermissionsMixin, BaseUserManager
 )
-from backend.settings import AUTH_USER_MODEL
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password, first_name, last_name):
@@ -42,28 +41,28 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class Orders(models.Model):
     id = models.AutoField(primary_key=True)
-    provider_id = models.IntegerField()
-    name = models.CharField(max_length=256)
-    wholesale_price = models.DecimalField(max_digits=9, decimal_places=2)
-    purchase_quantity = models.DecimalField(max_digits=9, decimal_places=2)
-    created_by = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.PROTECT)
+    provider_id = models.IntegerField(null=True)
+    name = models.CharField(max_length=256, null=True)
+    wholesale_price = models.DecimalField(max_digits=9, decimal_places=2, null=True)
+    amount = models.DecimalField(max_digits=9, decimal_places=2, null=True)
+    purchase_quantity = models.DecimalField(max_digits=9, decimal_places=2, null=True)
+    created_by = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
 class Nomenclature(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=256)
-    selling_price = models.DecimalField(max_digits=9, decimal_places=2)
-    created_by = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.PROTECT)
+    name = models.CharField(max_length=256, null=True)
+    selling_price = models.DecimalField(max_digits=9, decimal_places=2, null=True)
+    created_by = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
 class Provider(models.Model):
     id = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=1024)
-    requisit_id = models.IntegerField(null=True)
+    title = models.CharField(max_length=1024, null=True)
     date_create = models.DateField(auto_created=True)
-    created_by = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.PROTECT)
+    created_by = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -71,34 +70,33 @@ class Provider_Requisits(models.Model):
     id = models.AutoField(primary_key=True)
     inn = models.IntegerField(null=True)
     ogrn = models.IntegerField(null=True)
-    address = models.CharField(max_length=2048)
-    provider_id = models.IntegerField()
-    org_type = models.CharField(max_length=256)
-    bank_name = models.CharField(max_length=512)
+    address = models.CharField(max_length=2048, null=True)
+    provider_id = models.IntegerField(null=True)
+    org_type = models.CharField(max_length=256, null=True)
+    bank_name = models.CharField(max_length=512, null=True)
     bank_account = models.BigIntegerField(null=True)
     bank_bik = models.IntegerField(null=True)
     bank_cors_account = models.IntegerField(null=True)
-    bank_city = models.CharField(max_length=128)
-    created_by = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.PROTECT)
+    created_by = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
 class Provider_x_Nomenclature(models.Model):
-    nomenclature_id = models.IntegerField()
-    provider_id = models.IntegerField()
+    nomenclature_id = models.IntegerField(null=True)
+    provider_id = models.IntegerField(null=True)
     
 class Contact(models.Model):
     id = models.AutoField(primary_key=True)
-    first_name = models.CharField(max_length=256)
-    last_name = models.CharField(max_length=256)
-    phone = models.CharField(max_length=128)
-    email = models.EmailField(max_length=40)
+    first_name = models.CharField(max_length=256, null=True)
+    last_name = models.CharField(max_length=256, null=True)
+    phone = models.CharField(max_length=128, null=True)
+    email = models.EmailField(max_length=40, null=True)
     birthday_date = models.DateField(null=True)
-    description = models.CharField(max_length=1024)
-    created_by = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.PROTECT)
+    description = models.CharField(max_length=1024, null=True)
+    created_by = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
 class Provider_x_Contact(models.Model):
-    contact_id = models.IntegerField()
-    provider_id = models.IntegerField()
+    contact_id = models.IntegerField(null=True)
+    provider_id = models.IntegerField(null=True)

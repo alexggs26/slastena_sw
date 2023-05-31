@@ -6,6 +6,7 @@ import AuthContainer from '../components/auth/AuthContainer.vue'
 import RegisterContainer from '../components/register/RegisterContainer.vue'
 import MainContainer from '../components/main/MainContainer.vue'
 import ProvidersListContainer from '../components/providers/ProvidersListContainer.vue'
+import ProviderContainer from '../components/providers/ProviderContainer.vue'
 
 
 Vue.use(VueRouter)
@@ -28,6 +29,7 @@ const router = new VueRouter({
       children: [
         { path: 'orders', component: MainContainer, meta: { requiresAuth: true } },
         { path: 'providers', component: ProvidersListContainer, meta: { requiresAuth: true } },
+        { path: 'providers/details/:id', component: ProviderContainer, meta: { requiresAuth: true } },
         // { path: 'nomenclature', component: NomenclatureContainer, meta: { requiresAuth: true } },
       ]
     },

@@ -4,12 +4,25 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from django.views.decorators.csrf import csrf_exempt
 from ..serializers.user_serializer import UserRegistrationSerializer, UserLoginSerializer
+from ..models import User
 
 
 class UserRegistrationView(APIView):
 
     permission_classes = [AllowAny]
     serializer_class = UserRegistrationSerializer
+    
+    @csrf_exempt
+    def get(self, request):
+        objects = User.objects.all()
+        serializer = self.serializer_class(objects, many=True)
+        status_code = status.HTTP_200_OK
+        response = {
+            'success': 'True',
+            'status_code': status_code,
+            'items': serializer.data
+            }
+        return Response(response, status=status_code)
     
     @csrf_exempt
     def post(self, request):

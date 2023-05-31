@@ -1,47 +1,20 @@
 from rest_framework import serializers
-from provider_serializer import ProviderSerializer
+from ..models import Nomenclature, Provider_x_Nomenclature
 
 
-class NomenclatureSerializer(serializers.Serrializer):
-    id = serializers.IntegerField()
-    name = serializers.CharField(max_length=256)
-    selling_price = serializers.DecimalField()
-    created_by = serializers.IntegerField()
-    created_at = serializers.DateTimeField()
-    updated_at = serializers.DateTimeField()
-    provider = ProviderSerializer()
+class NomenclatureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Nomenclature
+        fields = '__all__'
     
+    def create(self, validated_data):
+        created_by = self.context['request'].user.id
+        nomenclature_data = Nomenclature.objects.create(created_by=created_by, **validated_data)
+        return nomenclature_data
+    
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.selling_price = validated_data.get('selling_price', instance.selling_price)
+        instance.save()
+        return instance
 
-# nomenclature: {
-#   id: 1,
-#   name: 'Конфэта',
-#   selling_price: 500.0,
-#   created_by: 1,
-#   created_at: '2023-05-18 09:30:00',
-#   updated_at: '2023-05-18 09:30:00',
-#   provider: [ 
-#       {
-#           id: 1,
-#           title: 'ИП Дечевян А.В.',
-#           requisits: {
-#               id: 1,
-#               ...
-#           },
-#           contacts: {
-#               id: 1,
-#               ...
-#           }
-#       },
-#       {
-#           id: 2,
-#           title: 'ИП Гончарян А.Ю.',
-#           requisits: {
-#               id: 2,
-#               ...
-#           },
-#           contacts: {
-#               id: 2,
-#               ...
-#       },
-#   ]
-# }

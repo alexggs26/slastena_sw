@@ -1,16 +1,18 @@
 <template>
     <div>
       <v-toolbar flat color="white">
-        <v-toolbar-title>My CRUD</v-toolbar-title>
-        <v-divider
-          class="mx-2"
-          inset
-          vertical
-        ></v-divider>
+        <v-toolbar-title>Поставщики</v-toolbar-title>
         <v-spacer></v-spacer>
+        <v-text-field
+          v-model="search"
+          append-icon="mdi-magnify"
+          label="Поиск"
+          single-line
+          hide-details
+        ></v-text-field>
         <v-dialog v-model="dialog" max-width="500px">
           <template v-slot:activator="{ on }">
-            <v-btn color="primary" dark class="mb-2" v-on="on">New Item</v-btn>
+            <v-btn color="primary" dark class="mb-2" v-on="on">Добавить поставщика</v-btn>
           </template>
           <v-card>
             <v-card-title>
@@ -21,19 +23,13 @@
               <v-container grid-list-md>
                 <v-layout wrap>
                   <v-flex xs12 sm6 md4>
-                    <v-text-field v-model="editedItem.name" label="Dessert name"></v-text-field>
+                    <v-text-field v-model="editedItem.title" label="Название"></v-text-field>
                   </v-flex>
                   <v-flex xs12 sm6 md4>
-                    <v-text-field v-model="editedItem.calories" label="Calories"></v-text-field>
+                    <v-text-field v-model="editedItem.date_create" label="Дата создания"></v-text-field>
                   </v-flex>
                   <v-flex xs12 sm6 md4>
-                    <v-text-field v-model="editedItem.fat" label="Fat (g)"></v-text-field>
-                  </v-flex>
-                  <v-flex xs12 sm6 md4>
-                    <v-text-field v-model="editedItem.carbs" label="Carbs (g)"></v-text-field>
-                  </v-flex>
-                  <v-flex xs12 sm6 md4>
-                    <v-text-field v-model="editedItem.protein" label="Protein (g)"></v-text-field>
+                    <v-text-field v-model="editedItem.responsible" label="Ответственный"></v-text-field>
                   </v-flex>
                 </v-layout>
               </v-container>
@@ -41,25 +37,25 @@
   
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" flat @click="close">Cancel</v-btn>
-              <v-btn color="blue darken-1" flat @click="save">Save</v-btn>
+              <v-btn color="blue darken-1" flat @click="close">Закрыть</v-btn>
+              <v-btn color="blue darken-1" flat @click="save">Сохранить</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
       </v-toolbar>
       <v-data-table
         :headers="headers"
-        :items="desserts"
+        :items="providers"
+        :search="search"
         class="elevation-1"
       >
       <template v-slot:body="{ items }">
         <tbody>
-        <tr v-for="item in items" :key="item.name">
-          <td>{{ item.name }}</td>
-          <td>{{ item.calories }}</td>
-          <td>{{ item.carbs }}</td>
-          <td>{{ item.fat }}</td>
-          <td>{{ item.protein }}</td>
+        <tr v-for="item in items" :key="item.id">
+          <td>{{ item.id }}</td>
+          <td>{{ item.title }}</td>
+          <td>{{ item.date_create }}</td>
+          <td>{{ item.created_by }}</td>
           <td class="justify-center layout px-0">
         <v-icon
           small
@@ -88,34 +84,34 @@
   <script>
     export default {
       name: 'ProvidersListContainer',
-      data: () => ({
-        dialog: false,
-        headers: [
-          { text: 'ID', value: 'id', align: 'left' },
-          { text: 'Поставщик', value: 'title' },
-          { text: 'Дата', value: 'date_create' },
-          { text: 'Ответственный', value: 'responsible' },
-          { text: 'Actions', value: 'actions', sortable: false },
-        ],
-        editedIndex: -1,
-        editedItem: {
-          name: '',
-          calories: 0,
-          fat: 0,
-          carbs: 0,
-          protein: 0
-        },
-        defaultItem: {
-          name: '',
-          calories: 0,
-          fat: 0,
-          carbs: 0,
-          protein: 0
-        },
-      }),
+      data: () => {
+        return {
+          dialog: false,
+          search: '',
+          headers: [
+            { text: 'ID', value: 'id', align: 'left' },
+            { text: 'Поставщик', value: 'title' },
+            { text: 'Дата создания', value: 'date_create' },
+            { text: 'Ответственный', value: 'created_by' },
+            { text: 'Действия', value: 'actions', sortable: false },
+          ],
+          providers:[],
+          editedIndex: -1,
+          editedItem: {
+            title: '',
+            date_create: '',
+            created_by: ''
+          },
+          defaultItem: {
+            title: '',
+            date_create: '',
+            created_by: '',
+          },
+        }
+    },
   
       computed: {
-          isLoggedIn : function(){ return this.$store.getters.isLoggedIn},
+          isLoggedIn : function() {return this.$store.getters.isLoggedIn},
           formTitle () {
               return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
           }
@@ -126,102 +122,27 @@
           val || this.close()
         }
       },
-  
-      created () {
-        this.initialize()
+
+      mounted () {
+        this.$store.dispatch('getProviderList')
+        this.providers = this.$store.state.providers.provider
       },
-  
+
       methods: {
-          logout: function () {
+        logout: function () {
           this.$store.dispatch('logout')
           .then(() => {
             this.$router.push('/login')
-          })
+            })
         },
-        initialize () {
-          this.desserts = [
-            {
-              name: 'Frozen Yogurt',
-              calories: 159,
-              fat: 6.0,
-              carbs: 24,
-              protein: 4.0
-            },
-            {
-              name: 'Ice cream sandwich',
-              calories: 237,
-              fat: 9.0,
-              carbs: 37,
-              protein: 4.3
-            },
-            {
-              name: 'Eclair',
-              calories: 262,
-              fat: 16.0,
-              carbs: 23,
-              protein: 6.0
-            },
-            {
-              name: 'Cupcake',
-              calories: 305,
-              fat: 3.7,
-              carbs: 67,
-              protein: 4.3
-            },
-            {
-              name: 'Gingerbread',
-              calories: 356,
-              fat: 16.0,
-              carbs: 49,
-              protein: 3.9
-            },
-            {
-              name: 'Jelly bean',
-              calories: 375,
-              fat: 0.0,
-              carbs: 94,
-              protein: 0.0
-            },
-            {
-              name: 'Lollipop',
-              calories: 392,
-              fat: 0.2,
-              carbs: 98,
-              protein: 0
-            },
-            {
-              name: 'Honeycomb',
-              calories: 408,
-              fat: 3.2,
-              carbs: 87,
-              protein: 6.5
-            },
-            {
-              name: 'Donut',
-              calories: 452,
-              fat: 25.0,
-              carbs: 51,
-              protein: 4.9
-            },
-            {
-              name: 'KitKat',
-              calories: 518,
-              fat: 26.0,
-              carbs: 65,
-              protein: 7
-            }
-          ]
-        },
-  
+        
         editItem (item) {
-          this.editedIndex = this.desserts.indexOf(item)
-          this.editedItem = Object.assign({}, item)
-          this.dialog = true
+          this.$router.push(`/app/providers/details/${item.id}`)
         },
   
         deleteItem (item) {
-          const index = this.desserts.indexOf(item)
-          confirm('Are you sure you want to delete this item?') && this.desserts.splice(index, 1)
+          const index = this.providers.indexOf(item)
+          confirm('Are you sure you want to delete this item?') && this.providers.splice(index, 1)
         },
   
         close () {
@@ -236,7 +157,7 @@
           if (this.editedIndex > -1) {
             Object.assign(this.desserts[this.editedIndex], this.editedItem)
           } else {
-            this.desserts.push(this.editedItem)
+            this.providers.push(this.editedItem)
           }
           this.close()
         }

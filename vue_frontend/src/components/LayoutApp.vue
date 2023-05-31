@@ -14,7 +14,7 @@
       </v-btn>
       </v-layout>
     </v-app-bar>
-    <v-navigation-drawer app dark clipped>
+    <v-navigation-drawer app color="accent" light clipped>
       <MenuContainer />
     </v-navigation-drawer>
     <v-main>
