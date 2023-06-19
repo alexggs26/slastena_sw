@@ -7,6 +7,9 @@ import RegisterContainer from '../components/register/RegisterContainer.vue'
 import MainContainer from '../components/main/MainContainer.vue'
 import ProvidersListContainer from '../components/providers/ProvidersListContainer.vue'
 import ProviderContainer from '../components/providers/ProviderContainer.vue'
+import ProviderCreateContainer from '../components/providers/ProviderCreateContainer.vue'
+import NomeclatureListContainer from '../components/nomenclature/NomenclatureList.vue'
+import OrderContainer from '../components/orders/OrderContainer.vue'
 
 
 Vue.use(VueRouter)
@@ -28,9 +31,12 @@ const router = new VueRouter({
       meta: { requiresAuth: true },
       children: [
         { path: 'orders', component: MainContainer, meta: { requiresAuth: true } },
+        { path: 'orders/create', component: OrderContainer, meta: { requiresAuth: true } },
+        { path: 'orders/details/:metaOrderId', component: OrderContainer, meta: { requiresAuth: true } },
         { path: 'providers', component: ProvidersListContainer, meta: { requiresAuth: true } },
+        { path: 'providers/create', component: ProviderCreateContainer, meta: { requiresAuth: true } },
         { path: 'providers/details/:id', component: ProviderContainer, meta: { requiresAuth: true } },
-        // { path: 'nomenclature', component: NomenclatureContainer, meta: { requiresAuth: true } },
+        { path: 'nomenclature', component: NomeclatureListContainer, meta: { requiresAuth: true } },
       ]
     },
   ]

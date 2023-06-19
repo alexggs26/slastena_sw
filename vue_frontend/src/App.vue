@@ -5,19 +5,22 @@
 </template>
 
 <script>
-
+import axios from 'axios'
+import router from './router'
+import store from './store'
 
 export default {
   name: 'App',
   created: function () {
-    this.$http.interceptors.response.use(undefined, function (err) {
-      return new Promise(function () {
-        if (err.status === 401 && err.config && !err.config.__isRetryRequest) {
-          this.$store.dispatch("logout")
+      axios.interceptors.response.use(function (response) {
+        return response
+      }, function (error) {
+        if (error.response.status === 401) {
+          store.dispatch('logout')
+          router.push('/login')
         }
-        throw err;
-      });
-    });
+        return Promise.reject(error)
+      })
   }
 };
 </script>

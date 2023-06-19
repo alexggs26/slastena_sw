@@ -10,38 +10,7 @@
           single-line
           hide-details
         ></v-text-field>
-        <v-dialog v-model="dialog" max-width="500px">
-          <template v-slot:activator="{ on }">
-            <v-btn color="primary" dark class="mb-2" v-on="on">Добавить поставщика</v-btn>
-          </template>
-          <v-card>
-            <v-card-title>
-              <span class="headline">{{ formTitle }}</span>
-            </v-card-title>
-  
-            <v-card-text>
-              <v-container grid-list-md>
-                <v-layout wrap>
-                  <v-flex xs12 sm6 md4>
-                    <v-text-field v-model="editedItem.title" label="Название"></v-text-field>
-                  </v-flex>
-                  <v-flex xs12 sm6 md4>
-                    <v-text-field v-model="editedItem.date_create" label="Дата создания"></v-text-field>
-                  </v-flex>
-                  <v-flex xs12 sm6 md4>
-                    <v-text-field v-model="editedItem.responsible" label="Ответственный"></v-text-field>
-                  </v-flex>
-                </v-layout>
-              </v-container>
-            </v-card-text>
-  
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" flat @click="close">Закрыть</v-btn>
-              <v-btn color="blue darken-1" flat @click="save">Сохранить</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
+        <v-btn color="primary" dark class="mb-2" @click="createItem">Добавить поставщика</v-btn>
       </v-toolbar>
       <v-data-table
         :headers="headers"
@@ -55,22 +24,36 @@
           <td>{{ item.id }}</td>
           <td>{{ item.title }}</td>
           <td>{{ item.date_create }}</td>
-          <td>{{ item.created_by }}</td>
-          <td class="justify-center layout px-0">
-        <v-icon
-          small
-          class="mr-2"
-          @click="editItem(item)"
-        >
-          mdi-pencil
-        </v-icon>
-        <v-icon
-          small
-          @click="deleteItem(item)"
-        >
-          mdi-delete
-        </v-icon>
-        </td>
+          <td>{{ item.created_by.full_name }}</td>
+          <v-dialog v-model="dialog" max-width="500px">   
+          <template v-slot:activator="{ on }">
+            <td class="justify-center layout px-0">
+            <v-icon
+              small
+              class="mr-2"
+              @click="editItem(item)"
+            >
+              mdi-pencil
+            </v-icon>
+            <v-icon
+              small
+              v-on="on"
+            >
+              mdi-delete
+          </v-icon>
+          </td>
+        </template>
+            <v-card>
+                <v-card-title class="p-1">
+                    Вы действительно хотите удалить всю информацию о поставщике?
+                </v-card-title>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="primary" flat @click="closeDialog">Закрыть</v-btn>
+                    <v-btn color="red" flat @click="deleteItem(item)">Удалить</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
       </tr>
       </tbody>
       </template>
@@ -95,39 +78,33 @@
             { text: 'Ответственный', value: 'created_by' },
             { text: 'Действия', value: 'actions', sortable: false },
           ],
-          providers:[],
-          editedIndex: -1,
-          editedItem: {
-            title: '',
-            date_create: '',
-            created_by: ''
-          },
-          defaultItem: {
-            title: '',
-            date_create: '',
-            created_by: '',
-          },
+          providers: [],
+          users: [],
         }
-    },
+      },
   
       computed: {
           isLoggedIn : function() {return this.$store.getters.isLoggedIn},
-          formTitle () {
-              return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
-          }
       },
-  
-      watch: {
-        dialog (val) {
-          val || this.close()
-        }
+
+      created () {
+        this.$store.dispatch('getProviderList').then(() => {
+          this.$store.dispatch('getUsers')
+        })
       },
 
       mounted () {
-        this.$store.dispatch('getProviderList')
-        this.providers = this.$store.state.providers.provider
+        this.users = this.$store.getters.USERS
+        this.providers = this.$store.getters.PROVIDER
+        for (const i of this.providers) {
+          for (const j of this.users) {
+            if (i.created_by === j.id) {
+                j.full_name = j.first_name + ' ' + j.last_name
+                i.created_by = j
+            }
+          }
+        }
       },
-
       methods: {
         logout: function () {
           this.$store.dispatch('logout')
@@ -139,28 +116,38 @@
         editItem (item) {
           this.$router.push(`/app/providers/details/${item.id}`)
         },
-  
+
+        createItem () {
+          this.$router.push('/app/providers/create')
+        },
         deleteItem (item) {
-          const index = this.providers.indexOf(item)
-          confirm('Are you sure you want to delete this item?') && this.providers.splice(index, 1)
-        },
-  
-        close () {
           this.dialog = false
-          setTimeout(() => {
-            this.editedItem = Object.assign({}, this.defaultItem)
-            this.editedIndex = -1
-          }, 300)
+          let id = item.id
+          this.$store.dispatch('deleteProvider', { id }).then(() => {
+              this.$store.dispatch('getRequisits', { id }).then(() => {
+                let requisits = this.$store.getters.REQUISITS[0]
+                  this.$store.dispatch('deleteRequisits', { requisits }).then(() => {
+                    this.$store.dispatch('getContacts', { id }).then(() => {
+                      const contacts = this.$store.getters.CONTACTS
+                      for (const i of contacts) {
+                        let contact_id = i.id
+                        console.log(contact_id)
+                        this.$store.dispatch('deleteContacts', { contact_id }).then(() => {
+                          let contact_link = {provider_id: id, contact_id: i.id}
+                          this.$store.dispatch('deleteContactLink', { contact_link })
+                        })
+                      }
+                }).then(() => {
+                        this.$store.dispatch('getProviderList')
+                      })
+            })
+          })
+          })
+         
         },
-  
-        save () {
-          if (this.editedIndex > -1) {
-            Object.assign(this.desserts[this.editedIndex], this.editedItem)
-          } else {
-            this.providers.push(this.editedItem)
-          }
-          this.close()
-        }
+        closeDialog() {
+            this.dialog = false
+        },
       }
     }
   </script>

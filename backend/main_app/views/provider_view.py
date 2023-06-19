@@ -164,7 +164,7 @@ class ContactsView(APIView):
     
     @csrf_exempt
     def get(self, request, pk):
-        contact_id = Provider_x_Contact.objects.filter(provider_id=pk)
+        contact_id = Provider_x_Contact.objects.filter(provider_id=pk).values('contact_id')
         objects = Contact.objects.filter(id__in=contact_id)
         serializer = self.serializer_class(objects, many=True)
         status_code = status.HTTP_200_OK
@@ -191,8 +191,7 @@ class ContactsView(APIView):
     @csrf_exempt
     def put(self, request, pk):
         try:
-            contact_id = Provider_x_Contact.objects.get(provider_id=pk)
-            contact = Contact.objects.filter(id__in=contact_id)
+            contact = Contact.objects.get(id=pk)
         except Contact.DoesNotExist:
             status_code = status.HTTP_404_NOT_FOUND
             response = {
@@ -216,7 +215,47 @@ class ContactsView(APIView):
     @csrf_exempt
     def delete(self, request, pk):
         try:
-            contact_id = Provider_x_Contact.objects.get(provider_id=pk)
+            contact_id =  Provider_x_Contact.objects.filter(provider_id=pk).values('contact_id')
+            contact = Contact.objects.filter(id__in=contact_id)
+        except Contact.DoesNotExist:
+            status_code = status.HTTP_404_NOT_FOUND
+            response = {
+                'message': 'Contact does not exist', 
+                'status': status_code
+            }
+            return Response(response, status=status_code)
+        else:
+            contact.delete()
+            status_code = status.HTTP_204_NO_CONTENT
+            response = {
+                'message': 'contact was deleted successfully!',
+                'status_code': status_code
+            }
+            return Response(response, status=status_code)
+ 
+        
+class ContactLinkView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = Provider_x_ContactSerializer
+    
+    @csrf_exempt
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        status_code = status.HTTP_201_CREATED
+        response = {
+            'success': 'True',
+            'status_code': status_code,
+            'item': serializer.data
+            }
+        return Response(response, status=status_code)
+    
+    @csrf_exempt
+    def delete(self, request):
+        try:
+            pk = request.data['provider_id']
+            contact_id =  Provider_x_Contact.objects.filter(provider_id=pk).values('contact_id')
             contact = Contact.objects.filter(id__in=contact_id)
         except Contact.DoesNotExist:
             status_code = status.HTTP_404_NOT_FOUND

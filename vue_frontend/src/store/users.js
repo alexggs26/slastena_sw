@@ -6,6 +6,11 @@ const store = {
         status: '',
         users: []
     },
+    getters: {
+        USERS: state => {
+            return state.users
+        }
+    },
     mutations: {
         setUsers(state, data) {
             state.status = 'ok'

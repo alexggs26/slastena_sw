@@ -34,7 +34,7 @@ class UserLoginSerializer(serializers.Serializer):
 
         if user is None:
             raise serializers.ValidationError(
-                'A user with this email and password is not found.'
+                'Неправильный логин или пароль'
             )
         try:
             payload = JWT_PAYLOAD_HANDLER(user)
@@ -43,7 +43,7 @@ class UserLoginSerializer(serializers.Serializer):
 
         except User.DoesNotExist:
             raise serializers.ValidationError(
-                'User with given email and password does not exists'
+                'Пользователя с таким логином и паролем не существует'
             )
         return {
             'email': user.email,

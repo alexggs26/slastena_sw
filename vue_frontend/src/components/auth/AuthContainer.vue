@@ -26,6 +26,11 @@
                                 @click:append="show1 = !show1"
                                 hide-details="auto"
                             ></v-text-field>
+                            <v-card-text class="mt-0 red--text"
+                                    v-if="!!error_data"
+                                >
+                                {{ error_data }}
+                            </v-card-text>
                             <v-card-actions class="py-0">
                             <v-btn
                                 class="mt-4"
@@ -68,8 +73,12 @@ export default {
                 required_email: value => !!value || 'Введите Email',
                 min: v => v.length >= 6 || 'Минимум 6 символолов',
                 emailMatch: () => (`The email and password you entered don't match`),
-        },
-
+        },  
+        }
+    },
+    computed: {
+        error_data() {
+            return this.$store.getters.ERROR_DATA
         }
     },
     methods: {

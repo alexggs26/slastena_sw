@@ -6,7 +6,19 @@ const store = {
         status: '',
         provider: [],
         requisits: [],
-        contacts: []
+        contacts: [],
+        contact_link: []
+    },
+    getters: {
+        PROVIDER: state => {
+            return state.provider
+        },
+        REQUISITS: state => {
+            return state.requisits
+        },
+        CONTACTS: state => {
+            return state.contacts
+        }
     },
     mutations: {
         loadRequest(state) {
@@ -29,6 +41,10 @@ const store = {
         setContacts(state, data) {
             state.status = 'ok',
             state.contacts = data
+        },
+        setContactLink(state, data) {
+            state.status = 'ok',
+            state.contact_link = data
         },
         deleteProvider(state) {
             state.status = 'deleted provider',
@@ -78,11 +94,11 @@ const store = {
                     })
                 })
         },
-        getRequisit({ commit }, { provider_id }) {
+        getRequisits({ commit }, { id }) {
             return new Promise((resolve, reject) => {
                 commit('loadRequest')
                 axios({
-                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/requisits/provider_${provider_id}`,
+                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/requisits/provider_${id}`,
                     method: 'GET'
                 })
                     .then(resp => {
@@ -95,11 +111,11 @@ const store = {
                     })
             })
         },
-        getContact({ commit }, { provider_id }) {
+        getContacts({ commit }, { id }) {
             return new Promise((resolve, reject) => {
                 commit('loadRequest')
                 axios({
-                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/contacts/provider_${provider_id}`,
+                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/contacts/provider_${id}`,
                     method: 'GET'
                 })
                     .then(resp => {
@@ -112,15 +128,16 @@ const store = {
                     })
             })
         },
-        createProvider({ commit }) {
+        createProvider({ commit }, { provider }) {
             return new Promise((resolve, reject) => {
                 commit('loadRequest')
                 axios({
                     url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/`,
+                    data: provider,
                     method: 'POST'
                 })
                     .then(resp => {
-                        commit('setProvider', resp.data.items)
+                        commit('setProvider', resp.data.item)
                         resolve(resp)
                     })
                     .catch(err => {
@@ -129,16 +146,16 @@ const store = {
                     })
             })
         },
-        createRequisits({ commit }, { data }) {
+        createRequisits({ commit }, { requisits }) {
             return new Promise((resolve, reject) => {
                 commit('loadRequest')
                 axios({
-                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/requisits/provider_${data.provider.id}`,
-                    data: data,
+                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/requisits/create/`,
+                    data: requisits,
                     method: 'POST'
                 })
                     .then(resp => {
-                        commit('setRequisits', resp.data.items)
+                        commit('setRequisits', resp.data.item)
                         resolve(resp)
                     })
                     .catch(err => {
@@ -147,16 +164,16 @@ const store = {
                     })
             })
         },
-        createContacts({ commit }, { data }) {
+        createContacts({ commit }, { contact }) {
             return new Promise((resolve, reject) => {
                 commit('loadRequest')
                 axios({
-                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/contacts/provider_${data.provider.id}`,
-                    data: data,
+                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/contacts/create/`,
+                    data: contact,
                     method: 'POST'
                 })
                     .then(resp => {
-                        commit('setContacts', resp.data.items)
+                        commit('setContacts', resp.data.item)
                         resolve(resp)
                     })
                     .catch(err => {
@@ -165,16 +182,33 @@ const store = {
                     })
             })
         },
-        updateProvider({ commit }, { data }) {
+        createContactLink({ commit }, { contact_link }) {
+            return new Promise((resolve, reject) => {
+                axios({
+                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/contacts/create_link/`,
+                    data: contact_link,
+                    method: 'POST'
+                })
+                .then(resp => {
+                    commit('commitRequest')
+                    resolve(resp)
+                })
+                .catch(err => {
+                    commit('errorRequest')
+                    reject(err)
+                })
+            })
+        },
+        updateProvider({ commit }, { provider }) {
             return new Promise((resolve, reject) => {
                 commit('loadRequest')
                 axios({
-                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/${data.provider.id}`,
-                    data: data,
+                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/${provider.id}`,
+                    data: provider,
                     method: 'PUT'
                 })
                     .then(resp => {
-                        commit('setProvider', resp.data.items)
+                        commit('setProvider', resp.data.item)
                         resolve(resp)
                     })
                     .catch(err => {
@@ -183,16 +217,16 @@ const store = {
                     })
             })
         },
-        updateRequisits({ commit }, { data }) {
+        updateRequisits({ commit }, { requisits }) {
             return new Promise((resolve, reject) => {
                 commit('loadRequest')
                 axios({
-                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/requisits/provider_${data.provider.id}`,
-                    data: data,
+                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/requisits/provider_${requisits.provider_id}`,
+                    data: requisits,
                     method: 'PUT'
                 })
                     .then(resp => {
-                        commit('setRequisits', resp.data.items)
+                        commit('setRequisits', resp.data.item)
                         resolve(resp)
                     })
                     .catch(err => {
@@ -201,16 +235,16 @@ const store = {
                     })
             })
         },
-        updateContacts({ commit }, { data }) {
+        updateContacts({ commit }, { contact }) {
             return new Promise((resolve, reject) => {
                 commit('loadRequest')
                 axios({
-                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/contacts/provider_${data.provider.id}`,
-                    data: data,
+                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/contacts/${contact.id}`,
+                    data: contact,
                     method: 'PUT'
                 })
                     .then(resp => {
-                        commit('setContacts', resp.data.items)
+                        commit('setContacts', resp.data.item)
                         resolve(resp)
                     })
                     .catch(err => {
@@ -219,11 +253,11 @@ const store = {
                     })
             })
         },
-        deleteProvider({ commit }, { data }) {
+        deleteProvider({ commit }, { id }) {
             return new Promise((resolve, reject) => {
                 commit('loadRequest')
                 axios({
-                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/${data.provider.id}`,
+                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/${id}`,
                     method: 'DELETE'
                 })
                     .then(resp => {
@@ -236,11 +270,11 @@ const store = {
                     })
             })
         },
-        deleteRequisits({ commit }, { data }) {
+        deleteRequisits({ commit }, { requisits }) {
             return new Promise((resolve, reject) => {
                 commit('loadRequest')
                 axios({
-                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/requisits/provider_${data.provider.id}`,
+                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/requisits/provider_${requisits.provider_id}`,
                     method: 'DELETE'
                 })
                     .then(resp => {
@@ -253,11 +287,12 @@ const store = {
                     })
             })
         },
-        deleteContacts({ commit }, { data }) {
+        deleteContacts({ commit }, { contact_id }) {
             return new Promise((resolve, reject) => {
                 commit('loadRequest')
+                console.log(contact_id)
                 axios({
-                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/contacts/provider_${data.provider.id}`,
+                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/contacts/${contact_id}`,
                     method: 'DELETE'
                 })
                     .then(resp => {
@@ -269,7 +304,25 @@ const store = {
                         reject(err)
                     })
             })
-        }
+        },
+        deleteContactLink({ commit }, { contact_link }) {
+            return new Promise((resolve, reject) => {
+                commit('loadRequest')
+                axios({
+                    url: `${process.env.VUE_APP_BACKEND_HOST}/api/providers/contacts/delete_link/`,
+                    data: contact_link,
+                    method: 'DELETE'
+                })
+                    .then(resp => {
+                        commit('deleteContacts')
+                        resolve(resp)
+                    })
+                    .catch(err => {
+                        commit('errorRequest')
+                        reject(err)
+                    })
+            })
+        },
     }
 }
 

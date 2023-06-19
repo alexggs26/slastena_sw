@@ -9,11 +9,13 @@ const store = {
     state: {
         status: '',
         token: localStorage.getItem('token') ?? '',
-        user: localStorage.getItem('user') ?? {}
+        user: localStorage.getItem('user') ?? {},
+        error_data: ''
     },
     getters: {
         isLogged: state => !!state.token,
         authStatus: state => state.status,
+        ERROR_DATA: state => state.error_data
     },
     mutations: {
         auth_request(state) {
@@ -24,8 +26,9 @@ const store = {
             state.token = token;
             state.user = user;
         },
-        auth_error(state) {
+        auth_error(state, data) {
             state.status = 'error';
+            state.error_data = data;
         },
         logout(state) {
             state.status = '';
@@ -51,7 +54,7 @@ const store = {
                         resolve(resp)
                     })
                     .catch(err => {
-                        commit('auth_error')
+                        commit('auth_error', err.response.data.non_field_errors[0])
                         localStorage.removeItem('token')
                         localStorage.removeItem('user')
                         reject(err)

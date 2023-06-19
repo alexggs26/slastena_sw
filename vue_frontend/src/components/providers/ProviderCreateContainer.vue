@@ -1,25 +1,10 @@
 <template>
     <v-container>
     <v-toolbar flat color="white">
-        <v-toolbar-title>{{ provider.title }}</v-toolbar-title>
+        <v-toolbar-title>Добавить нового поставщика</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-btn color="primary" dark class="mr-2" @click="save">Сохранить</v-btn>
         <v-btn color="primary" dark class="mr-2" @click="close">Закрыть</v-btn>
-        <v-dialog v-model="dialog" max-width="500px">
-            <template v-slot:activator="{ on }">
-                <v-btn color="red" dark class="mr-2" v-on="on">Удалить</v-btn>
-            </template>
-            <v-card>
-                <v-card-title class="p-1">
-                    Вы действительно хотите удалить всю информацию о поставщике?
-                </v-card-title>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="primary" flat @click="closeDialog">Закрыть</v-btn>
-                    <v-btn color="red" flat @click="deleteAll">Удалить</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
     </v-toolbar>
     <v-card outlined>
     <v-card-text>
@@ -92,7 +77,7 @@
                     <v-flex md4 v-for="contact in contacts" :key="contact.onPageIndex">
                         <v-card class="card-container" flat append-icon="mdi-close">
                             <v-card-text>
-                            <v-card-text> {{ contact.onPageIndex }}</v-card-text>
+                            <v-card-text> {{ contact.onPageIndex }} </v-card-text>
                                 <v-divider class="ml-15" vertical></v-divider>
                                 <v-btn class="m-10" small @click="deleteContact(contact)">Удалить</v-btn>
                                 <v-text-field v-model="contact.first_name" label="Имя"></v-text-field>
@@ -113,14 +98,18 @@
 
 <script>
 export default {
-    name: 'ProviderContainer',
+    name: 'ProviderCreateContainer',
     data: () => ({
         dialog: false,
         createdContacts: [],
         deletedContacts: [],
-        provider: {},
-        usersList: [],
+        mutableProvider: {
+            title: '',
+            date_create: '',
+            created_by: {}
+        },
         requisits: {},
+        contacts: [],
         newContact: {
             onPageIndex: 0,
             first_name: '',
@@ -131,123 +120,68 @@ export default {
             description: '',
 
         },
-        defaultContact: {
-            onPageIndex: 0,
-            first_name: '',
-            last_name: '',
-            phone: '',
-            email: '',
-            birthday_date: '',
-            description: '',
-        },
     }),
     computed: {
         isLoggedIn: function() {return this.$store.getters.isLoggedIn},
+        usersList () {
+            return this.$store.getters.USERS
+        },
         users () {
             for (const i of this.usersList) {
                 i.full_name = i.first_name + ' ' + i.last_name
             }
             return this.usersList
         },
-        mutableProvider () {
-            const provider = this.provider
-              for (const i of this.users) {
-                  if (provider.created_by === i.id) {
-                    provider.created_by = i
-                }
-            }
-            return this.provider
-        },
-        contacts () {
-            const contacts = this.$store.getters.CONTACTS
-            if (contacts.length !== undefined) {
-            for (const i of contacts) {
-                i.onPageIndex = Array.prototype.indexOf(contacts, i) + 2
-            }
-            return contacts
-        }   return []
-        }
+       
     },
 
     mounted () {
-        let id = this.$route.params.id
-        this.$store.dispatch('getUsers').then(() => {
-            this.$store.dispatch('getProvider', { id }).then(() => {
-                this.$store.dispatch('getRequisits', { id }).then(() => {
-                    this.$store.dispatch('getContacts', { id })
-                }).then(() => {
-                    this.provider = this.$store.getters.PROVIDER[0]
-                    this.usersList = this.$store.getters.USERS
-                    this.requisits = this.$store.getters.REQUISITS[0]
-                })
-            })
-        })
-    },
+        this.$store.dispatch('getUsers')
+        const curDate = new Date(Date.now())
+        this.mutableProvider.date_create = curDate.toLocaleString("default", {year: "numeric"}) + '-' + curDate.toLocaleString("default", {month: "2-digit"}) + '-' + curDate.toLocaleString("default", {day: "2-digit"});
+        },
 
     methods: {
         save () {
             let created_by = this.mutableProvider.created_by.id
+    
             delete this.mutableProvider.created_by
             delete this.mutableProvider.created_at
             delete this.mutableProvider.updated_at
+
             this.mutableProvider.created_by = created_by
 
             let provider = this.mutableProvider
-            let requisits = this.requisits
-            let contacts = this.contacts
-            let deletedContacts = this.deletedContacts
 
-            this.$store.dispatch('updateProvider', { provider }).then(() => {
-                this.$store.dispatch('updateRequisits', { requisits }).then(() => {
-                    for (const contact of contacts) {
-                        delete contact.onPageIndex
-                        if (contact.id !== undefined) {
-                            this.$store.dispatch('updateContacts', { contact })
-                        }
-                        else {
-                            this.$store.dispatch('createContacts', { contact }).then(() =>{
-                                let contact_id = this.$store.getters.CONTACTS.id
-                                let contact_link = {provider_id: provider.id, contact_id: contact_id}
-                                this.$store.dispatch('createContactLink', { contact_link })
-                            })
-                        }
-                    }
-                }).then(() => {
-                    for (const deletedContact of deletedContacts) {
-                        if (deletedContact.id !== undefined) {
-                            this.$store.dispatch('deleteContacts', { deletedContact })
-                        }
-                    }
-                    }).then(() => {this.$store.dispatch('getProviderList')})
-                   
-        })
-            
-        },      
-        close () {
-            this.$store.dispatch('getProviderList').then(() => {
-                this.$router.push('/app/providers/') 
-            })
-        },
-        deleteAll () {
-            this.dialog = false
-            let provider = this.mutableProvider
-            let requisits = this.requisits
-            let contacts = this.contacts
-            this.$store.dispatch('deleteProvider', { provider }).then(() => {
-                this.$store.dispatch('deleteRequisits', { requisits }).then(() => {
-                    for (const contact of contacts) {
-                        if (contact.id !== undefined) {
-                            this.$store.dispatch('deleteContacts', { contact })
-                        }
+            this.$store.dispatch('createProvider', { provider })
+              .then(() => {
+                let provider_id = this.$store.getters.PROVIDER.id
+                let requisits = this.requisits
+                requisits.provider_id = provider_id
+                requisits.created_by = created_by
+                this.$store.dispatch('createRequisits', { requisits })
+                .then(() => {
+                  for (const contact of this.contacts) {
+                    delete contact.onPageIndex
+                      this.$store.dispatch('createContacts', { contact })
+                      .then(() => {
+                        let contact_id = this.$store.getters.CONTACTS.id
+                        let contact_link = {provider_id: provider_id, contact_id: contact_id}
+                        this.$store.dispatch('createContactLink', { contact_link })
+                      })
+                        .then(() => {
+                          this.$router.push(`/app/providers/details/${provider_id}`)
+                        })
                     }
                 })
-            }).then(() => {
-                this.$store.dispatch('getProviderList').then(() => {
-                    this.$router.push('/app/providers/') 
-            })
             })
         },
+        close () {
+            this.$router.push('/app/providers/')
+        },
+
         addContact () {
+            this.newContact = Object.assign({}, this.newContact)
             this.newContact.onPageIndex = this.contacts.length + 1
             this.contacts.push(this.newContact)
         },
